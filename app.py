@@ -48,10 +48,12 @@ def form():
     publishedDecision = form.publishedDecision.data
 
     if request.method == 'POST' and form.validate_on_submit:
-        sess = Session(form.viya_url.data, form.username.data,form.password.data, verify_ssl=False)
-        current_session(sess)
-        Fsession['session'] = 'SAS'
-        return redirect('/decision')
+        try:
+            sess = Session(form.viya_url.data, form.username.data,form.password.data, verify_ssl=False)
+            current_session(sess)
+            Fsession['session'] = 'SAS'
+            return redirect('/decision')
+        except: redirect('404.html')
     else: redirect('404.html')
     return render_template('form.html',form=form)
 
@@ -134,5 +136,5 @@ def scoreDecision():
         else: print('General Error page  ')
     return render_template('inputs.html', form=formDecision)
 if __name__ == "__main__":
-    app.run(host="0.0.0.0",debug=False)
+    app.run(host="0.0.0.0",debug=True)
 

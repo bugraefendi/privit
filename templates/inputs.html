@@ -1,0 +1,91 @@
+<html>
+{% extends "bootstrap/base.html" %}
+
+{% block title %}Flasky{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Home</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/decision">Inputs</a></li>
+            </ul>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/settings">Settings</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<h1>Inputs for Decision</h1>
+<form method="POST" action="{{ url_for('scoreDecision') }}">
+    <ul>
+        {{ form.job.label }}
+        {{ form.job }}
+    </ul>
+    <ul>
+        {{ form.loan.label }}
+        {{ form.loan }}
+    </ul>
+    <ul>
+        {{ form.mortdue.label }}
+        {{ form.mortdue }}
+    </ul>
+    <ul>
+        {{ form.delinq.label }}
+        {{ form.delinq }}
+    </ul>
+    <ul>
+        {{ form.derog.label }}
+        {{ form.derog }}
+    </ul>
+    <ul>
+        {{ form.clage.label }}
+        {{ form.clage }}
+    </ul>
+    <ul>
+        {{ form.ninq.label }}
+        {{ form.ninq }}
+    </ul>
+    <ul>
+        {{ form.clno.label }}
+        {{ form.clno }}
+    </ul>
+    <ul>
+        {{ form.yoj.label }}
+        {{ form.yoj }}
+    </ul>
+    <ul>
+        {{ form.reason.label }}
+        {{ form.reason }}
+    </ul>
+    <ul>
+        {{ form.income.label }}
+        {{ form.income }}
+    </ul>
+    <ul>
+        {{ form.value.label }}
+        {{ form.value }}
+    </ul>
+    <ul>
+        {{ form.currentDebt.label }}
+        {{ form.currentDebt }}
+    </ul>
+    <ul><input type="submit" value="Submit"></ul>
+</form>
+{% endblock %}
+</body>
+
+</html>
