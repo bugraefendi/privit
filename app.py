@@ -2,7 +2,7 @@ from flask import Flask, redirect, render_template,request,flash,url_for,make_re
 from flask_bootstrap import Bootstrap
 from flask import session as Fsession
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField,PasswordField,IntegerField,FloatField
+from wtforms import StringField, SubmitField,PasswordField,IntegerField
 from wtforms.validators import DataRequired,InputRequired
 from sasctl import Session, current_session, get, post, put, delete
 import json
@@ -23,7 +23,7 @@ class Decisionform(FlaskForm):
     job = StringField('Please provide your job')
     loan = IntegerField('How much Loan you need ?')
     mortdue = IntegerField('Please provide your amount due on existing mortgage ')
-    delinq = FloatField(' Number of delinquent credit lines ')
+    delinq = IntegerField(' Number of delinquent credit lines ')
     derog =IntegerField(' Number of major derogatory reports ')
     clage = IntegerField('Age of your oldest credit line in months')
     ninq = IntegerField('Number of your recent credit inquiries ')
