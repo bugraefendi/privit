@@ -1,61 +1,67 @@
-from flask import Flask, redirect, render_template,request,flash,url_for,make_response,jsonify
+from flask import Flask, redirect, render_template, request, flash, make_response, jsonify
 from flask_bootstrap import Bootstrap
 from flask import session as Fsession
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField,PasswordField,IntegerField
-from wtforms.validators import DataRequired,InputRequired
+from wtforms import StringField, SubmitField, PasswordField, IntegerField, FloatField, SelectField
+from wtforms.validators import DataRequired, InputRequired
 from sasctl import Session, current_session, get, post, put, delete
 import json
-
 
 
 app = Flask(__name__)
 app.secret_key = 'hardstring to guesss'
 bootstrap = Bootstrap(app)
 
+
 class SettingForms(FlaskForm):
     viya_url = StringField('What`s your host', validators=[DataRequired()])
-    username = StringField('What`s your username for SAS`?',validators=[DataRequired()] )
-    password = PasswordField('Provide Pass',validators=[InputRequired()])
-    publishedDecision = StringField('Decision Name ',validators=[DataRequired()])
-    
+    username = StringField('What`s your username for SAS`?',
+                           validators=[DataRequired()])
+    password = PasswordField('Provide Pass', validators=[InputRequired()])
+    publishedDecision = StringField(
+        'Decision Name ', validators=[DataRequired()])
+
+
 class Decisionform(FlaskForm):
-    job = StringField('Please provide your job')
+    job = SelectField('Please select your job', choices=[
+                      ('Sales'), ('Manager'), ('Office'), ('Executive Professor'), ('Self'), ('Other')])
     loan = IntegerField('How much Loan you need ?')
-    mortdue = IntegerField('Please provide your amount due on existing mortgage ')
-    delinq = IntegerField(' Number of delinquent credit lines ')
-    derog =IntegerField(' Number of major derogatory reports ')
-    clage = IntegerField('Age of your oldest credit line in months')
+    mortdue = IntegerField(
+        'Please provide your amount due on existing mortgage ')
+    delinq = FloatField(' Number of delinquent credit lines ')
+    derog = IntegerField(' Number of major derogatory reports ')
+    clage = IntegerField('Age of your oldest credit line in months?')
     ninq = IntegerField('Number of your recent credit inquiries ')
-    clno =IntegerField('Number of your credit lines')
+    clno = IntegerField('Number of your credit lines')
     yoj = IntegerField(' Years at present job ')
-    reason = StringField('Why do you need credit')
+    reason = SelectField('Why do you need credit?', choices=[
+                         ('Debt Consolidation'), ('Home Improvement'), ('Other')])
     income = IntegerField('What`s your income ')
     value = IntegerField('Your current value of property')
     currentDebt = IntegerField('What`s your current debt ?')
     submit = SubmitField('Submit')
 
 
-
 @app.route('/')
 def home_page():
     return render_template('user.html')
 
-@app.route('/settings',methods=['GET','POST'])
+
+@app.route('/settings', methods=['GET', 'POST'])
 def form():
     global publishedDecision
     form = SettingForms()
     publishedDecision = form.publishedDecision.data
 
     if request.method == 'POST' and form.validate_on_submit:
-        try:
-            sess = Session(form.viya_url.data, form.username.data,form.password.data, verify_ssl=False)
-            current_session(sess)
-            Fsession['session'] = 'SAS'
-            return redirect('/decision')
-        except: redirect('404.html')
-    else: redirect('404.html')
-    return render_template('form.html',form=form)
+        sess = Session(form.viya_url.data, form.username.data,
+                       form.password.data, verify_ssl=False)
+        current_session(sess)
+        Fsession['session'] = 'SAS'
+        return redirect('/decision')
+    else:
+        redirect('404.html')
+    return render_template('form.html', form=form)
 
 
 @app.errorhandler(404)
@@ -64,9 +70,7 @@ def page_not_found(e):
     return render_template('404.html'), 404
 
 
-
-
-@app.route('/decision',methods=['GET','POST'])
+@app.route('/decision', methods=['GET', 'POST'])
 def scoreDecision():
     formDecision = Decisionform()
     res = {
@@ -96,23 +100,18 @@ def scoreDecision():
             {"name": "CLNO_",
                      "value": formDecision.clno.data}
         ]}
-    contentType = "application/vnd.sas.microanalytic.module.step.input+json"
-    publishedDecision
+
     if request.method == 'POST' and formDecision.validate_on_submit and 'session' in Fsession:
+        contentType = "application/vnd.sas.microanalytic.module.step.input+json"
         debtinc = formDecision.currentDebt.data / formDecision.income.data
+        if formDecision.reason.data == 'Debt Consolidation':
+            res['inputs'][3] = {'name': 'REASON_', 'value': 'DebtCon'}
+        elif formDecision.reason.data == 'Home Improvement':
+            res['inputs'][3] = {'name': 'REASON_', 'value': 'HomeImp'}
+        else:
+            res['inputs'][3] = {'name': 'REASON_', 'value': 'Other'}
         res['inputs'][5] = {'name': 'DEBTINC_', 'value': debtinc}
-        if formDecision.job.data.upper() == 'SALES' and 41000 <= formDecision.income.data <= 89000:
-            res['inputs'][0] = {'name': 'JOB_', 'value': formDecision.job.data.upper()}
-            masExecutionResponse = post(f"microanalyticScore/modules/{publishedDecision}/steps/execute",
-                                        headers={"Content-Type": contentType}, data=json.dumps(res))
-            if masExecutionResponse.get('executionState') == 'completed':
-                resp = {d['name']: d['value']
-                        for d in dict(masExecutionResponse)['outputs'][1:18]}
-                return make_response(jsonify(resp), 200)
-        elif formDecision.job.data.upper() == 'SALES' and formDecision.income.data < 40000:
-            print('Your Income and job does not match')
-            
-        elif formDecision.job.data.upper() in ['MGR','MANAGER'] and 44000 <= formDecision.income.data <= 107000:
+        if formDecision.job.data == 'Sales' and 41000 <= formDecision.income.data <= 89000 and debtinc < .5:
             res['inputs'][0] = {'name': 'JOB_', 'value': formDecision.job.data}
             masExecutionResponse = post(f"microanalyticScore/modules/{publishedDecision}/steps/execute",
                                         headers={"Content-Type": contentType}, data=json.dumps(res))
@@ -120,9 +119,37 @@ def scoreDecision():
                 resp = {d['name']: d['value']
                         for d in dict(masExecutionResponse)['outputs'][1:18]}
                 return make_response(jsonify(resp), 200)
-        elif formDecision.job.data.upper() in ['MGR','MANAGER'] and formDecision.income.data < 40000:
-            print('Your Income and job does not match')
-        elif formDecision.job.data in ['Office', 'Other'] and 18000 <= formDecision.income.data <= 71000:
+        elif formDecision.job.data == 'Sales' and formDecision.income.data < 40000:
+            flash('Your Income and job does not match','error')
+
+        elif formDecision.job.data == 'Manager' and 44000 <= formDecision.income.data <= 107000 and debtinc < .5:
+            res['inputs'][0] = {'name': 'JOB_', 'value': 'Mgr'}
+            masExecutionResponse = post(f"microanalyticScore/modules/{publishedDecision}/steps/execute",
+                                        headers={"Content-Type": contentType}, data=json.dumps(res))
+            if masExecutionResponse.get('executionState') == 'completed':
+                resp = {d['name']: d['value']
+                        for d in dict(masExecutionResponse)['outputs'][1:18]}
+                return make_response(jsonify(resp), 200)
+        elif formDecision.job.data == 'Manager' and formDecision.income.data < 40000:
+            flash('Your Income and job does not match')
+            return redirect('404')
+        elif formDecision.job.data in ['Office', 'Other'] and 18000 <= formDecision.income.data <= 71000 and debtinc < .5:
+            res['inputs'][0] = {'name': 'JOB_', 'value': formDecision.job.data}
+            masExecutionResponse = post(f"microanalyticScore/modules/{publishedDecision}/steps/execute",
+                                        headers={"Content-Type": contentType}, data=json.dumps(res))
+            if masExecutionResponse.get('executionState') == 'completed':
+                resp = {d['name']: d['value']
+                        for d in dict(masExecutionResponse)['outputs'][1:18]}
+                return make_response(jsonify(resp), 200)
+        elif formDecision.job.data == 'Executive Professor' and 69000 <= formDecision.income.data <= 200000 and debtinc < .5:
+            res['inputs'][0] = {'name': 'JOB_', 'value': 'ProfExe'}
+            masExecutionResponse = post(f"microanalyticScore/modules/{publishedDecision}/steps/execute",
+                                        headers={"Content-Type": contentType}, data=json.dumps(res))
+            if masExecutionResponse.get('executionState') == 'completed':
+                resp = {d['name']: d['value']
+                        for d in dict(masExecutionResponse)['outputs'][1:18]}
+                return make_response(jsonify(resp), 200)
+        elif formDecision.job.data == 'Self' and 30000 <= formDecision.income.data <= 350000 and debtinc < .5:
             res['inputs'][0] = {'name': 'JOB_', 'value': formDecision.job.data}
             masExecutionResponse = post(f"microanalyticScore/modules/{publishedDecision}/steps/execute",
                                         headers={"Content-Type": contentType}, data=json.dumps(res))
@@ -131,10 +158,11 @@ def scoreDecision():
                         for d in dict(masExecutionResponse)['outputs'][1:18]}
                 return make_response(jsonify(resp), 200)
         elif debtinc > .5:
-            print('Your Debt to Income is too high')
-            return ('404')
-        else: print('General Error page  ')
+            return render_template('404.html')
+        else:
+            return render_template('404.html')
     return render_template('inputs.html', form=formDecision)
-if __name__ == "__main__":
-    app.run(host="0.0.0.0",debug=True)
 
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", debug=True)
