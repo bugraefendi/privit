@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <h2>Here is how to load a bootstrap modal as soon as the document is ready </h2>
+  <!-- Trigger the modal with a button -->
+
+
+  <!-- Modal -->
+  <div id="MyFancyModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">Please confirm</div>
+            <div class="modal-body">
+                {% with messages = get_flashed_messages() %} {% if messages %}
+                <ul class="flashes">
+                    <li>{{ message }}</li>
+                </ul>
+                {% endif %} {% endwith %}
+            </div>
+            <div class="modal-footer">
+                <form action="{{ averageDecision }}" method="post">
+                    <button type="submit" class="btn btn-danger">Yes</button>
+                    <button class="btn btn-default" data-dismiss="modal">
+                        No
+                    </button>
+            </div>
+        </div>
+    </div>
+</div>
+  
+</div>
+
+<script>
+$(document).ready(function(){
+   $("#MyFancyModal").modal();
+});
+</script>
+
+</body>
+</html>

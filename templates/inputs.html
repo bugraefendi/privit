@@ -1,100 +1,135 @@
+<!DOCTYPE html>
 <html>
-{% extends "bootstrap/base.html" %}
 
-{% block title %}Flasky{% endblock %}
-
-{% block navbar %}
-<div class="navbar navbar-inverse" role="navigation">
+<head></head>
+<body>
+  {% extends "bootstrap/base.html" %} {% block title %}Flasky{% endblock %}
+  {% block navbar %}
+  <div class="navbar navbar-inverse" role="navigation">
     <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/">Home</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/decision">Inputs</a></li>
-            </ul>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/settings">Settings</a></li>
-            </ul>
-        </div>
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">Home</a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/decision">Inputs</a></li>
+        </ul>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/settings">Settings</a></li>
+        </ul>
+      </div>
     </div>
-</div>
-{% endblock %}
-{% block content %}
-<h1>Inputs for Decision</h1>
-<form method="POST" action="{{ url_for('scoreDecision') }}">
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul class=flashes>
-        {% for message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
+  </div>
+  {% endblock %}
+  {% block content %}
+  <h1>Inputs for Decision</h1>
+  <form method="POST" action="{{ url_for('scoreDecision') }}">
     <ul>
-        {{ form.job.label }}
-        {{ form.job }}
+      {{form.average_active.label}}
+      {{form.average_active}}
     </ul>
     <ul>
-        {{ form.loan.label }}
-        {{ form.loan }}
+      {{ form.job.label }}
+      {{ form.job }}
     </ul>
     <ul>
-        {{ form.mortdue.label }}
-        {{ form.mortdue }}
+      {{ form.loan.label }}
+      {{ form.loan }}
     </ul>
     <ul>
-        {{ form.delinq.label }}
-        {{ form.delinq }}
+      {{ form.mortdue.label }}
+      {{ form.mortdue }}
     </ul>
     <ul>
-        {{ form.derog.label }}
-        {{ form.derog }}
+      {{ form.delinq.label }}
+      {{ form.delinq }}
     </ul>
     <ul>
-        {{ form.clage.label }}
-        {{ form.clage }}
+      {{ form.derog.label }}
+      {{ form.derog }}
     </ul>
     <ul>
-        {{ form.ninq.label }}
-        {{ form.ninq }}
+      {{ form.clage.label }}
+      {{ form.clage }}
     </ul>
     <ul>
-        {{ form.clno.label }}
-        {{ form.clno }}
+      {{ form.ninq.label }}
+      {{ form.ninq }}
     </ul>
     <ul>
-        {{ form.yoj.label }}
-        {{ form.yoj }}
+      {{ form.clno.label }}
+      {{ form.clno }}
     </ul>
     <ul>
-        {{ form.reason.label }}
-        {{ form.reason }}
+      {{ form.yoj.label }}
+      {{ form.yoj }}
     </ul>
     <ul>
-        {{ form.income.label }}
-        {{ form.income }}
+      {{ form.reason.label }}
+      {{ form.reason }}
     </ul>
     <ul>
-        {{ form.value.label }}
-        {{ form.value }}
+      {{ form.income.label }}
+      {{ form.income }}
     </ul>
     <ul>
-        {{ form.currentDebt.label }}
-        {{ form.currentDebt }}
+      {{ form.value.label }}
+      {{ form.value }}
     </ul>
-    <ul><input type="submit" value="Submit"></ul>
-</form>
-{% endblock %}
+    <ul>
+      {{ form.currentDebt.label }}
+      {{ form.currentDebt }}
+    </ul>
+    <div class="container">
+      <div id="confirm">
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#MyFancyModal">Submit
+        </button>
+        <div id="MyFancyModal" class="modal fade" role="dialog">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">Please confirm</div>
+              <div class="modal-body">
+                <ul class="flashes">
+                  {% with messages = get_flashed_messages() %} {% if messages %}
+                      {% for message in messages %}
+                      <li>{{ message }}</li>
+                      {% endfor %}
+                  {% endif %} {% endwith %}
+                </ul>
+              </div>
+              <div class="modal-footer">
+                <form action="{{ decision }}" method="post">
+                  <button type="submit" class="btn btn-danger">Yes</button>
+                  <button class="btn btn-default" data-dismiss="modal">
+                    No
+                  </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  {% block scripts %}
+  {{ super() }}
+  <script>$(document).ready(function() {
+    var messages = "{{ get_flashed_messages() }}";
+
+    if (typeof messages != 'undefined' || messages != '[]') {
+        $("#MyFancyModal").modal();
+    };
+});
+  </script>
+  {% endblock %}
+  {% endblock %}
 </body>
 
 </html>
