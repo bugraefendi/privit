@@ -1,5 +1,7 @@
 # WebApp Decision
 
-Please build the image with 'docker build . --tag<yourapptag>' than start the app with either from docker desktop or with docker run -p 5000:5000 <yourapptag> .
+Before building the image update the sascfg_personal.py file according to your server details,after updating check the reason function inside of app for correct path of sascfg_personal.py.
 
-Please note every command has to run from folder`s directory.
+Build the image with 'docker build . -t <yourapptag>' then start the app with either from docker desktop or with docker run -p 5000:5000 <yourapptag> .
+
+
